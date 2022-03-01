@@ -53,7 +53,7 @@ Nimporter provides an official way to develop applications and libraries that
 make use of Nim code for achieving higher performance.
 
 It does this by providing a way to directly import Nim code and have it be
-compiled at runtime. However, unlink Cython, this will not proliferate your
+compiled at runtime. However, unlike Cython, this will not proliferate your
 development environment and require adding bunches of exceptions to your
 `.gitignore` file.
 
@@ -212,6 +212,28 @@ Project/
 
 For several examples of how to structure a project, look in the `tests/` folder.
 
+## Compiler Switches In Pure Python
+
+For many projects, it is convenient to set default Nim compiler switches from
+the Python module importing the Nim extension. An example of this is below:
+
+```python
+import sys
+import nimporter
+
+if sys.platform == 'win32':
+    nimporter.NimCompiler.NIM_CLI_ARGS = [...]
+else:
+    nimporter.NimCompiler.NIM_CLI_ARGS = [...]
+
+import the_extension_module
+```
+
+By accessing `nimporter.NimCompiler.NIM_CLI_ARGS` directly, you can customize
+switches prior to importing the extension module. Please note that the switches
+will be used for all extension modules since Python will cache the import of
+Nimporter and `NimCompiler.NIM_CLI_ARGS` is a static class field.
+
 ## Compiler Switches using `*.nim.cfg` or `*.nims`
 
 ---
@@ -305,13 +327,13 @@ To do this, add these lines to your `setup.py` file:
 setup(
     ...,                            # Keep your existing arguments
     package_data={'': ['*.nim*']},  # Distribute *.nim & *.nim.cfg source files
-    # include_package_data=True,    # <- This line cannot work with package_data
+    # include_package_data=True,    # <- This line won't work with package_data
     setup_requires = [
-        "choosenim_install", # Optional. Auto-installs Nim compiler
-         ],
+        "choosenim_install",        # Optional. Auto-installs Nim compiler
+    ],
     install_requires=[
-        'nimporter',  # Must depend on Nimporter
-        ]
+        'nimporter',                # Must depend on Nimporter
+    ]
 )
 ```
 
@@ -429,6 +451,9 @@ Lastly, it has been tested and fully supported on these platforms:
 
 > Just for fun, I got out my Windows laptop, Mac, and SSHed into a Linux box on
 AWS. I then ran the test suite on all 3 platforms simultaneously. ;)
+
+Additionally @SekouDiaoNlp ran the test suite on OpenBSD ans FreeBSD without issue.
+He also ran the test suite on Apple Silicon M1 processors with great results.
 
 Nimporter likely works on a bunch of other platforms but I cannot justify the
 time required to test them at this point.
