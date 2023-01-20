@@ -2,7 +2,7 @@ name: Manual Windows
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ dev, investigate-windows-failure]
   pull_request:
     branches: [ master ]
 
